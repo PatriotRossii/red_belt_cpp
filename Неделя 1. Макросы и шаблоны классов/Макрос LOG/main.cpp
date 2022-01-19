@@ -1,4 +1,4 @@
-//#include "../../common/test_runner.h"
+#include "test_runner.h"
 #include <sstream>
 
 #include <string>

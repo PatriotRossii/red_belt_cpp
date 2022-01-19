@@ -1,5 +1,5 @@
 #include "airline_ticket.h"
-#include "../../common/test_runner.h"
+#include "test_runner.h"
 
 #include <algorithm>
 #include <numeric>
