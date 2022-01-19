@@ -1,5 +1,4 @@
-#include "../../common/test_runner.h"
-
+//#include "../../common/test_runner.h"
 #include <sstream>
 
 #include <string>
@@ -12,32 +11,37 @@ public:
   void SetLogLine(bool value) { log_line = value; }
   void SetLogFile(bool value) { log_file = value; }
 
-  bool GetLogLine() const {
-    return log_line;
+  void SetLine(int line) {
+    this->line = line;
   }
-  bool getLogFile() const {
-    return log_file;
+  void SetFile(const std::string& file) {
+    this->file = file;
   }
 
   void Log(const string& message) {
+    if (log_file && log_line) {
+      os << file << ':' << line << ' ';
+    } else if (log_file) {
+      os << file << ' ';
+    } else if (log_line) {
+      os << "Line " << line << ' ';
+    }
     os << message << '\n';
   }
 private:
   ostream& os;
+  
   bool log_line = false;
+  int line;
+
   bool log_file = false;
+  std::string file;
 };
 
 #define LOG(logger, message) {    \
-  if((logger).GetLogLine() && (logger).getLogFile()) {        \
-    logger.Log(std::string(__FILE__) + ":" + std::to_string(__LINE__) + ' ' + message);    \
-  } else if((logger.getLogFile())) {                          \
-    logger.Log(std::string(__FILE__) + " " + message);                     \
-  } else if((logger).GetLogLine()) {                          \
-    logger.Log(std::string("Line ") + std::to_string(__LINE__) + " " + message);           \
-  } else {                                                    \
-    logger.Log(message);                                      \
-  }                                                           \
+  logger.SetFile(__FILE__);       \
+  logger.SetLine(__LINE__);       \
+  logger.Log(message);            \
 }
 
 void TestLog() {
