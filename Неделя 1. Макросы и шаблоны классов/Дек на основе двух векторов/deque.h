@@ -59,21 +59,21 @@ public:
 	}
 
 	T& Front() {
-		if(!front.empty()) return front.back();
-		return back.front();
+		if(!front.empty()) return front.back().second;
+		return back.front().second;
 	}
 	const T& Front() const {
-		if(!front.empty()) return front.back();
-		return back.front();
+		if(!front.empty()) return front.back().second;
+		return back.front().second;
 	}
 
 	T& Back() {
-		if(!back.empty()) return back.back();
-		return front.front();
+		if(!back.empty()) return back.back().second;
+		return front.front().second;
 	}
 	const T& Back() const {
-		if(!back.empty()) return back.back();
-		return front.front();
+		if(!back.empty()) return back.back().second;
+		return front.front().second;
 	}
 
 	void PushFront(const T& value) {
