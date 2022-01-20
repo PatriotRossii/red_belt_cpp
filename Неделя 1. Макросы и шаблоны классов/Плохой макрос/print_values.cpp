@@ -3,12 +3,8 @@
 #include <ostream>
 using namespace std;
 
-#define PRINT_VALUES(out, x, y) {                 \
-  std::ostream& adsolqwei1 = (out);               \
-  const auto& asd2389 = (x);                      \
-  const auto& asdilj18 = (y);                     \
-	adsolqwei1 << asd2389 << std::endl << asdilj18 << std::endl;  \
-}
+#define PRINT_VALUES(out, x, y) \
+  out << (x) << '\n' << (y) << '\n'
 
 int main() {
   TestRunner tr;
