@@ -15,15 +15,15 @@ int main() {
   }, "PRINT_VALUES usage example");
 
   if(true) {
-    PRINT_VALUES(std::cout, 10, "MY FIRST TEST")
+    PRINT_VALUES(std::cout, 10, "MY FIRST TEST");
   } else {
-    PRINT_VALUES(std::cout, 10, "MY FIRST TEST AGAIN")
+    PRINT_VALUES(std::cout, 10, "MY FIRST TEST AGAIN");
   }
 
   if(true)
-    PRINT_VALUES(std::cout, 10, "MY SECOND TEST")
+    PRINT_VALUES(std::cout, 10, "MY SECOND TEST");
   else
-    PRINT_VALUES(std::cout, 10, "MY SECOND TEST AGAIN")
+    PRINT_VALUES(std::cout, 10, "MY SECOND TEST AGAIN");
 
   return 0;
 }
