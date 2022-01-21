@@ -1,10 +1,8 @@
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <iterator>
 #include <map>
-#include <string>
-#include <vector>
-#include <unordered_map>
 #include <set>
 
 using namespace std;
@@ -16,27 +14,22 @@ public:
     reachable_lists_[finish].insert(start);
   }
   int FindNearestFinish(int start, int finish) const {
-    if(reachable_lists_.at(start).find(finish) != reachable_lists_.at(start).end()) {
-      return 0;
+    int result = abs(start - finish);
+    if (reachable_lists_.count(start) < 1) {
+      return result;
     }
-    if(start == finish) { return 0; }
-
-    if(start < finish) {  // Если надо увеличить свою позицию
-      if(auto station = *(reachable_lists_.at(start).rbegin()); station > 0) {
-        return std::abs(finish - station);
-      } else {
-        return std::abs(finish - start); // Выгодней не сдвигаться
-      }
-    } else {              // Если надо уменьшить свою позицию
-      if(auto station = *(reachable_lists_.at(start).begin()); station < 0) {
-        return std::abs(finish - station);
-      } else {
-        return std::abs(finish - start); // Выгодней не сдвигаться
-      }
+    const set<int>& reachable_stations = reachable_lists_.at(start);
+    const auto finish_pos = reachable_stations.lower_bound(finish);
+    if (finish_pos != end(reachable_stations)) {
+      result = min(result, abs(finish - *finish_pos));
     }
+    if (finish_pos != begin(reachable_stations)) {
+      result = min(result, abs(finish - *prev(finish_pos)));
+    }
+    return result;
   }
 private:
-  unordered_map<int, set<int>> reachable_lists_;
+  map<int, set<int>> reachable_lists_;
 };
 
 
