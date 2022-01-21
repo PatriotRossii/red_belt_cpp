@@ -5,6 +5,8 @@
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
+#include <algorithm>
+#include <numeric>
 
 using namespace std;
 
@@ -14,10 +16,10 @@ public:
 
   void Read(int user_id, int page_count) {
   	if(auto it = userToPage.find(user_id); it != userToPage.end()) {
-  		pageToUser[it->second].erase(user_id);
+  		pageToUsercount[it->second] -= 1;
   	}
   	userToPage[user_id] = page_count;
-  	pageToUser[page_count].insert(user_id);
+  	pageToUsercount[page_count] += 1;
   }
 
   double Cheer(int user_id) const {
@@ -28,18 +30,16 @@ public:
   		return 1;
   	}
 
-  	int currentUserPage = userToPage.at(user_id);
-  	int total = 0;
-
-  	for(auto it = pageToUser.begin(), end = (--pageToUser.upper_bound(currentUserPage)); it != end; ++it) {
-  		total += it->second.size();
-  	}
-  	return static_cast<double>(total) / (userToPage.size() - 1);
+  	return std::accumulate(
+  		pageToUsercount.begin(),
+  		std::prev(pageToUsercount.upper_bound(userToPage.at(user_id))),
+  		0.0, [](const auto& x, const auto& y) { return x + y.second; }
+  	) / (userToPage.size() - 1);
   }
 
 private:
   static const int MAX_USER_COUNT_ = 100'000;
-  map<int, unordered_set<int>> pageToUser;
+  map<int, int> pageToUsercount;
   unordered_map<int, int> userToPage;
 };
 
@@ -64,7 +64,7 @@ int main() {
       cin >> page_count;
       manager.Read(user_id, page_count);
     } else if (query_type == "CHEER") {
-      cout << setprecision(6) << manager.Cheer(user_id) << std::endl;
+      cout << setprecision(6) << manager.Cheer(user_id) << '\n';
     }
   }
 
