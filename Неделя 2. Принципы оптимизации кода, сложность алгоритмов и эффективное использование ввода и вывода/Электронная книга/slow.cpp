@@ -12,41 +12,35 @@ using namespace std;
 
 class ReadingManager {
 public:
-  ReadingManager() { }
+  ReadingManager(): pages(1001, 0), users(100'000 + 1, -1) {  }
 
   void Read(int user_id, int page_count) {
-  	if(auto it = userToPage.find(user_id); it != userToPage.end()) {
-  		pageToUsercount[it->second] -= 1;
-  	}
-  	userToPage[user_id] = page_count;
-  	pageToUsercount[page_count] += 1;
+    for(int i = users[user_id] + 1; i <= page_count; ++i) {
+      pages[i] += 1;
+    }
+    users[user_id] = page_count;
   }
 
   double Cheer(int user_id) const {
-  	if(userToPage.find(user_id) == userToPage.end()) {
-  		return 0;
-  	}
-  	if(userToPage.size() == 1) {
-  		return 1;
-  	}
+    if(users[user_id] == -1) {
+      return 0;
+    } else if(pages[0] == 1) {
+      return 1;
+    }
 
-  	return std::accumulate(
-  		pageToUsercount.begin(),
-  		std::prev(pageToUsercount.upper_bound(userToPage.at(user_id))),
-  		0.0, [](const auto& x, const auto& y) { return x + y.second; }
-  	) / (userToPage.size() - 1);
+    return static_cast<double>(pages[0] - pages[users[user_id]])
+      / (pages[0] - 1);
   }
 
 private:
-  static const int MAX_USER_COUNT_ = 100'000;
-  map<int, int> pageToUsercount;
-  unordered_map<int, int> userToPage;
+  vector<int> pages;
+  vector<int> users;
 };
 
 
 int main() {
-  ios::sync_with_stdio(false);
-  cin.tie(nullptr);
+  //ios::sync_with_stdio(false);
+  //cin.tie(nullptr);
 
   ReadingManager manager;
 
