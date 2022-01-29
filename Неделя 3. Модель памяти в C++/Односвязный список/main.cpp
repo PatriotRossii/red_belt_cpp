@@ -33,16 +33,30 @@ public:
     }
   }
   void InsertAfter(Node* node, const T& value) {
+    if(node == nullptr) {
+      return PushFront(value);
+    }
     Node* new_node = new Node{value};
     new_node->next = node->next;
     node->next = new_node;
   }
   void RemoveAfter(Node* node) {
+    if(node == nullptr) {
+      return PopFront();
+    }
+    if(node->next == nullptr) {
+      return;
+    }
+
     Node* new_after_node = node->next->next;
     delete node->next;
     node->next = new_after_node;
   }
   void PopFront() {
+    if(head == nullptr) {
+      return;
+    }
+
     Node* new_head = head->next;
     delete head;
     head = new_head;
