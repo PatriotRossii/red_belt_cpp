@@ -14,24 +14,32 @@ class ObjectPool {
 public:
   T* Allocate() {
     if(deallocated.size()) {
-      allocated.push_back(deallocated.front());
+      T* object = deallocated.front();
+
+      allocated.insert(object);
       deallocated.pop_front();
-    } else {
-      allocated.push_back(new T);
+
+      return object;
     }
-    return allocated.back();
+
+    T* new_object = new T;
+    allocated.insert(new_object);
+    return new_object;
   }
   T* TryAllocate() {
     if(deallocated.size()) {
-      allocated.push_back(deallocated.front());
+      T* object = deallocated.front();
+      
+      allocated.insert(object);
       deallocated.pop_front();
-      return allocated.back();
+
+      return object;
     }
     return nullptr;
   }
   
   void Deallocate(T* object) {
-    if(auto it = find(allocated.begin(), allocated.end(), object); it == allocated.end()) {
+    if(auto it = allocated.find(object); it == allocated.end()) {
       throw invalid_argument{"No such object"};
     } else {
       deallocated.push_back(*it);
@@ -48,7 +56,7 @@ public:
     }
   }
 private:
-  deque<T*> allocated;
+  set<T*> allocated;
   deque<T*> deallocated;
 };
 
