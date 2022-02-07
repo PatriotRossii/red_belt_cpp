@@ -14,40 +14,40 @@ template <typename TAirport>
 class AirportCounter {
 public:
   // конструктор по умолчанию: список элементов пока пуст
-  AirportCounter() { }
+  AirportCounter() {
+    for(auto it = 0; it != static_cast<int>(TAirport::Last_); ++it) {
+      statistics[static_cast<TAirport>(it)] = 0; // O(NLogA)
+    }
+  }
 
   // конструктор от диапазона элементов типа TAirport
   template <typename TIterator>
-  AirportCounter(TIterator begin, TIterator end) {
-    for(auto it = 0; it != static_cast<int>(TAirport::Last_); ++it) {
-      statistics[static_cast<TAirport>(it)] = 0;
-    }
+  AirportCounter(TIterator begin, TIterator end): AirportCounter() {
     for(auto it = begin; it != end; ++it) {
-      statistics[*it] += 1;
+      statistics[*it] += 1; // O(N)
     }
   }
 
   // получить количество элементов, равных данному
   size_t Get(TAirport airport) const {
-    if(statistics.count(airport) == 0) return 0;
-    return statistics.at(airport);
+    return statistics.at(airport); // O(log N)
   }
 
   // добавить данный элемент
   void Insert(TAirport airport) {
-    statistics[airport] += 1;
+    statistics[airport] += 1; // O(log N)
     size += 1;
   }
 
   // удалить одно вхождение данного элемента
   void EraseOne(TAirport airport) {
-    statistics[airport] -= 1;
+    statistics[airport] -= 1; // O(log N)
     size -= 1;
   }
 
   // удалить все вхождения данного элемента
   void EraseAll(TAirport airport) {
-    size -= statistics[airport];
+    size -= statistics[airport]; // O(log N)
     statistics[airport] = 0;
   }
 
