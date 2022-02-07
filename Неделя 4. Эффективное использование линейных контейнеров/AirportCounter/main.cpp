@@ -16,23 +16,21 @@ template<typename TAirport>
 class Iterator {
 public:
   Iterator(const AirportCounter<TAirport>& counter, size_t idx)
-    : counter(counter), idx(idx) {
-      data = {counter.GetAirport(idx), counter.Get(counter.GetAirport(idx))};
-    }
+    : counter(counter), idx(idx) { }
 
   const pair<TAirport, size_t>& operator*() {
-    return data;
+    return {counter.GetAirport(idx), counter.Get(counter.GetAirport(idx))};
   }
   Iterator operator++() {
     return Iterator(counter, idx + 1);
   }
-  const pair<TAirport, size_t>* operator->() {
-    return &data;
-  }
-
 
   friend bool operator==(const Iterator<TAirport>& lhs, const Iterator<TAirport>& rhs);
   friend bool operator!=(const Iterator<TAirport>& lhs, const Iterator<TAirport>& rhs);
+  Iterator<TAirport>& operator=(const Iterator<TAirport>& rhs) {
+    this->idx = rhs.idx;
+    return *this;
+  }
 private:
   const AirportCounter<TAirport>& counter;
   pair<TAirport, size_t> data;
