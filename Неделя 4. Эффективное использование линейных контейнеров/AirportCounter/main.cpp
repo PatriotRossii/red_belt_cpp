@@ -9,61 +9,23 @@
 
 using namespace std;
 
-template <typename TAirport>
-class AirportCounter;
-
-template<typename TAirport>
-class Iterator {
-public:
-  Iterator(const AirportCounter<TAirport>& counter, size_t idx)
-    : counter(counter), idx(idx) { }
-
-  const pair<TAirport, size_t>& operator*() {
-    return {counter.GetAirport(idx), counter.Get(counter.GetAirport(idx))};
-  }
-  Iterator operator++() {
-    return Iterator(counter, idx + 1);
-  }
-
-  friend bool operator==(const Iterator<TAirport>& lhs, const Iterator<TAirport>& rhs);
-  friend bool operator!=(const Iterator<TAirport>& lhs, const Iterator<TAirport>& rhs);
-  Iterator<TAirport>& operator=(const Iterator<TAirport>& rhs) {
-    this->idx = rhs.idx;
-    return *this;
-  }
-private:
-  const AirportCounter<TAirport>& counter;
-  pair<TAirport, size_t> data;
-  size_t idx;
-};
-
-template<typename TAirport>
-bool operator==(const Iterator<TAirport>& lhs, const Iterator<TAirport>& rhs) {
-  return lhs.idx == rhs.idx;
-}
-
-template<typename TAirport>
-bool operator!=(const Iterator<TAirport>& lhs, const Iterator<TAirport>& rhs) {
-  return !(lhs == rhs);
-}
-
 // TAirport should be enum with sequential items and last item TAirport::Last_
 template <typename TAirport>
 class AirportCounter {
 public:
   // конструктор по умолчанию: список элементов пока пуст
-  AirportCounter() { }
-
-  // конструктор от диапазона элементов типа TAirport
-  template <typename TIterator>
-  AirportCounter(TIterator begin, TIterator end) {
-    for(auto it = begin; it != end; ++it) {
-      statistics[static_cast<size_t>(*it)] += 1;
+  AirportCounter() {
+    for(size_t it = 0; it != static_cast<size_t>(TAirport::Last_); ++it) {
+      statistics[it] = 0;
     }
   }
 
-  TAirport GetAirport(size_t idx) const {
-    return airports[idx];
+  // конструктор от диапазона элементов типа TAirport
+  template <typename TIterator>
+  AirportCounter(TIterator begin, TIterator end): AirportCounter() {
+    for(auto it = begin; it != end; ++it) {
+      statistics[static_cast<size_t>(*it)] += 1;
+    }
   }
 
   // получить количество элементов, равных данному
@@ -90,23 +52,19 @@ public:
   }
 
   using Item = pair<TAirport, size_t>;
-  using Items = const AirportCounter&;
-
-  auto begin() const {
-    return Iterator<TAirport>(*this, 0);
-  }
-  auto end() const {
-    return Iterator<TAirport>(*this, static_cast<size_t>(TAirport::Last_));
-  }
+  using Items = array<Item, static_cast<size_t>(TAirport::Last_)>;
 
   // получить некоторый объект, по которому можно проитерироваться,
   // получив набор объектов типа Item - пар (аэропорт, количество),
   // упорядоченных по аэропорту
   Items GetItems() const {
-    return *this;
+    Items items;
+    for(size_t it = 0; it != static_cast<size_t>(TAirport::Last_); ++it) {
+      items[it] = {static_cast<TAirport>(it), statistics[it]};
+    }
+    return items;
   }
 private:
-  array<TAirport, static_cast<size_t>(TAirport::Last_)> airports;
   array<size_t, static_cast<size_t>(TAirport::Last_)> statistics;
   size_t size;
 };
