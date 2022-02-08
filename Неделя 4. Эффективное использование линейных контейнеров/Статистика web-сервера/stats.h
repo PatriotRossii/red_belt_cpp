@@ -54,7 +54,7 @@ public:
 };
 
 HttpRequest ParseRequest(string_view line) {
-  if(line.starts_with(' ')) {
+  if(!line.empty() && line.front() == ' ') {
     line = line.substr(line.find_first_not_of(' '));
   }
 
