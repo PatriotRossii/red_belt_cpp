@@ -1,6 +1,7 @@
 #include <list>
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -9,17 +10,14 @@ int main() {
 	cin.tie(nullptr);
 
 	int n; cin >> n;
+
 	list<int> row;
+	vector<list<int>::iterator> positions(100'000 + 1, row.end());
 
 	while(n--) {
 		int currentNumber; int numberNext;
 		cin >> currentNumber >> numberNext;
-
-		if(auto it = std::find(row.begin(), row.end(), numberNext); it == row.end()) {
-			row.push_back(currentNumber);
-		} else {
-			row.insert(it, currentNumber);
-		}
+		positions[currentNumber] = row.insert(positions[numberNext], currentNumber);
 	}
 
 	for(auto it = row.begin(), end = row.end(); it != end; ++it) {
