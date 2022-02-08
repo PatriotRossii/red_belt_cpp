@@ -25,12 +25,14 @@ public:
   }
 
   typename array<T, N>::iterator begin() {
+    if(size == 0) return this->end();
     return array.begin();
   }
   typename array<T, N>::iterator end() {
     return array.end();
   }
   typename array<T, N>::const_iterator begin() const {
+    if(size == 0) return this->end();
     return array.cbegin();
   }
   typename array<T, N>::const_iterator end() const {
