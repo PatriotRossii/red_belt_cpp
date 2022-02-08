@@ -1,53 +1,76 @@
 #include <string>
 #include <string_view>
+#include <list>
 
-#include "../../common/test_runner.h"
+#include "test_runner.h"
+//#include "../../common/test_runner.h"
 
 using namespace std;
 
 class Editor {
  public:
   // Реализуйте конструктор по умолчанию и объявленные методы
-  Editor() { }
+  Editor(): currentPosition(0), currentIterator(text.begin()) {}
 
   void Left() {
     if(currentPosition == 0) return;
-    currentPosition -= 1;
+    --currentPosition, --currentIterator;
   }
   void Right() {
-    if(currentPosition == text.size() + 1) return;
-    currentPosition += 1;
+    if(currentPosition == text.size()) return;
+    ++currentPosition, ++currentIterator;
   }
 
   void Insert(char token) {
-    text.insert(currentPosition, 1, token);
-    currentPosition += 1;
+    text.insert(currentIterator, token);
+    ++currentPosition;
   }
 
   void Cut(size_t tokens = 1) {
+    buffer.clear();
     if(text.empty()) return;
 
-    buffer = text.substr(currentPosition, tokens);
-    text = text.erase(currentPosition, tokens);
+    auto fromIterator = currentIterator;
+    auto endIterator = getN(tokens);
+
+    buffer = std::string(fromIterator, endIterator);
+    currentIterator = endIterator;
+    text.erase(fromIterator, endIterator);
   }
-  void Copy(size_t tokens = 1) {
-    if(text.empty()) return;
 
-    buffer = text.substr(currentPosition, tokens);
+  void Copy(size_t tokens = 1) {
+    buffer.clear();
+    if(text.empty()) return;
+    buffer = std::string(currentIterator, getN(tokens));
   }
   void Paste() {
     if(buffer.empty()) return;
-  
-    text.insert(currentPosition, buffer);
+    text.insert(currentIterator, buffer.begin(), buffer.end());
     currentPosition += buffer.size();
   }
 
   string GetText() const {
-    return text;
+    return {text.begin(), text.end()};
   }
 private:
-  int currentPosition{0};
-  string text, buffer;
+  list<char>::iterator getN(size_t tokens) {
+    auto endIterator = currentIterator;
+    if(currentPosition + tokens > text.size()) {
+      endIterator = text.end();
+    } else {
+      while(tokens--) {
+        ++endIterator;
+      }
+    }
+    return endIterator;
+  }
+
+  size_t currentPosition;
+
+  list<char> text;
+  list<char>::iterator currentIterator;
+
+  string buffer;
 };
 
 void TypeText(Editor& editor, const string& text) {
