@@ -1,12 +1,62 @@
 #include "test_runner.h"
+//#include "../../common/test_runner.h"
 
 #include "http_request.h"
 #include "stats.h"
 
 #include <map>
 #include <string_view>
+#include <unordered_set>
 
 using namespace std;
+
+HttpRequest ParseRequest(string_view line) {
+  if(!line.empty() && line.front() == ' ') {
+    line = line.substr(line.find_first_not_of(' '));
+  }
+
+  auto first_delim = line.find(' ');
+  auto second_delim = line.find(' ', first_delim + 1);
+
+  return HttpRequest{
+    line.substr(0, first_delim),
+    line.substr(first_delim + 1, second_delim - (first_delim + 1)),
+    line.substr(second_delim + 1)
+  };
+}
+
+Stats::Stats() {
+  for(string_view x: supportedMethods) {
+    methodStats[x] = 0;
+  }
+  methodStats["UNKNOWN"] = 0;
+
+  for(string_view x: supportedUris) {
+    uriStats[x] = 0;
+  }
+  uriStats["unknown"] = 0;
+}
+void Stats::AddMethod(string_view method) {
+  if(supportedMethods.count(method) != 0) {
+    methodStats[method] += 1;
+  } else {
+    methodStats["UNKNOWN"] += 1;
+  }
+}
+void Stats::AddUri(string_view uri) {
+  if(supportedUris.count(uri) != 0) {
+    uriStats[uri] += 1;
+  } else {
+    uriStats["unknown"] += 1;
+  }
+}
+
+const map<string_view, int>& Stats::GetMethodStats() const {
+  return methodStats;
+}
+const map<string_view, int>& Stats::GetUriStats() const {
+  return uriStats;
+}
 
 /*Stats ServeRequests(istream& input) {
   Stats result;
@@ -19,7 +69,7 @@ using namespace std;
     result.AddMethod(req.method);
   }
   return result;
-}*/
+}
 
 void TestBasic() {
   const string input =
@@ -85,10 +135,10 @@ void TestAbsentParts() {
 
   ASSERT_EQUAL(default_constructed.GetMethodStats(), expected_method_count);
   ASSERT_EQUAL(default_constructed.GetUriStats(), expected_url_count);
-}
+}*/
 
 int main() {
-  TestRunner tr;
+  /*TestRunner tr;
   RUN_TEST(tr, TestBasic);
-  RUN_TEST(tr, TestAbsentParts);
+  RUN_TEST(tr, TestAbsentParts);*/
 }
