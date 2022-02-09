@@ -33,11 +33,11 @@ String GetUniqueCharacters(const String& string) {
 template <typename String>
 vector<Group<String>> GroupHeavyStrings(vector<String> strings) {
 	unordered_map<String, Group<String>> groups;
-	for(const String& x: strings) {
+	for(String& x: strings) {
 		groups[GetUniqueCharacters(x)].push_back(std::move(x));
 	}
 	vector<Group<String>> result;
-	for(const auto& [_, value]: groups) {
+	for(auto& [_, value]: groups) {
 		result.push_back(std::move(value));
 	}
 	return result;
