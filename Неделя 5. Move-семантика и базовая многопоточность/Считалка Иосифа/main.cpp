@@ -1,5 +1,5 @@
-#include "test_runner.h"
-//#include "../../common/test_runner.h"
+//#include "test_runner.h"
+#include "../../common/test_runner.h"
 
 #include <cstdint>
 #include <iterator>
@@ -7,18 +7,23 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <list>
 
 using namespace std;
 
 template <typename RandomIt>
 void MakeJosephusPermutation(RandomIt first, RandomIt last, uint32_t step_size) {
-  vector<typename RandomIt::value_type> pool;
+  list<typename RandomIt::value_type> pool;
   std::move(first, last, std::back_inserter(pool));
 
   size_t cur_pos = 0;
   while (!pool.empty()) {
-    *(first++) = std::move(pool[cur_pos]);
-    pool.erase(pool.begin() + cur_pos);
+  	auto it = pool.begin();
+  	std::advance(it, cur_pos);
+
+    *(first++) = std::move(*it);
+    pool.erase(it);
+    
     if (pool.empty()) {
       break;
     }
