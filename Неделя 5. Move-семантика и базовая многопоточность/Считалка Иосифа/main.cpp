@@ -28,13 +28,14 @@ void MakeJosephusPermutation(RandomIt first, RandomIt last, uint32_t step_size) 
     }
 
     size_t advance = step_size - 1;
-    cur_pos = (cur_pos + advance) % pool.size();
 
     if(cur_pos + advance >= pool.size()) {
-    	it = std::next(pool.begin(), cur_pos);
+    	it = std::next(pool.begin(), (cur_pos + advance) % pool.size());
     } else {
     	it = std::next(it, advance);
     }
+
+    cur_pos = (cur_pos + advance) % pool.size();
   }
 }
 
