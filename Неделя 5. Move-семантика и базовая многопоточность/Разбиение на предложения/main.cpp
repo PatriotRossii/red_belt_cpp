@@ -22,7 +22,7 @@ vector<Sentence<Token>> SplitIntoSentences(vector<Token> tokens) {
   vector<Token> currentSentence;
 
   bool enterEnd = false;
-  for(const Token& token: tokens) {
+  for(Token& token: tokens) {
     currentSentence.push_back(std::move(token));
 
     if(token.IsEndSentencePunctuation() && !enterEnd) {
