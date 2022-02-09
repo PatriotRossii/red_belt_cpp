@@ -17,17 +17,23 @@ void MakeJosephusPermutation(RandomIt first, RandomIt last, uint32_t step_size) 
   std::move(first, last, std::back_inserter(pool));
 
   size_t cur_pos = 0;
-  while (!pool.empty()) {
-  	auto it = pool.begin();
-  	std::advance(it, cur_pos);
+  auto it = pool.begin();
 
+  while (!pool.empty()) {
     *(first++) = std::move(*it);
-    pool.erase(it);
-    
+    it = pool.erase(it);
+
     if (pool.empty()) {
       break;
     }
-    cur_pos = (cur_pos + step_size - 1) % pool.size();
+
+    size_t advance = step_size - 1;
+    if(cur_pos + advance >= pool.size()) {
+    	it = std::next(pool.begin(), (cur_pos + advance) % pool.size());
+    } else {
+    	it = std::next(it, advance);
+    }
+    cur_pos = (cur_pos + advance) % pool.size();
   }
 }
 
