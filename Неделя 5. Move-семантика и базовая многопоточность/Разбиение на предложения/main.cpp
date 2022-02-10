@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <iterator>
 
 using namespace std;
 
@@ -14,28 +15,32 @@ using namespace std;
 template <typename Token>
 using Sentence = vector<Token>;
 
+template<typename Iterator>
+Iterator FindSentenceEnd(Iterator begin, Iterator end) {
+  auto sentence_end = std::adjacent_find(
+    begin, end,
+    [](const auto& x, const auto& y) {
+      return x.IsEndSentencePunctuation() && !y.IsEndSentencePunctuation();
+    }
+  );
+  return sentence_end == end ? sentence_end : std::next(sentence_end, 1);
+}
+
 // Класс Token имеет метод bool IsEndSentencePunctuation() const
 template <typename Token>
 vector<Sentence<Token>> SplitIntoSentences(vector<Token> tokens) {
   vector<Sentence<Token>> sentences;
 
-  vector<Token> currentSentence;
+  auto begin = tokens.begin();
+  auto end = tokens.end();
 
-  bool enterEnd = false;
-  for(Token& token: tokens) {
-    currentSentence.push_back(std::move(token));
-
-    if(token.IsEndSentencePunctuation() && !enterEnd) {
-      enterEnd = true;
-    } else if(enterEnd) {
-      enterEnd = false;
-      sentences.push_back(std::move(currentSentence));
-      currentSentence.clear();
-    }
-  }
-
-  if(!currentSentence.empty()) {
-    sentences.push_back(std::move(currentSentence));
+  while(begin != end) {
+    const auto sentence_end = FindSentenceEnd(begin, end);
+    sentences.push_back(Sentence<Token>{
+      make_move_iterator(begin),
+      make_move_iterator(sentence_end)
+    });
+    begin = sentence_end;
   }
 
   return sentences;
