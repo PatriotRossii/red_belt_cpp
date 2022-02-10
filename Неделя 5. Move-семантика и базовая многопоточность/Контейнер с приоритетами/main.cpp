@@ -8,27 +8,21 @@
 #include <set>
 #include <utility>
 #include <vector>
+#include <list>
+#include <unordered_map>
 
 using namespace std;
 
 template <typename T>
 class PriorityCollection {
-private:
-  struct PriorityObject {
-    T object;
-    mutable int priority;
-    bool operator<(const PriorityObject& rhs) const {
-      return std::tie(this->priority, this->object) > std::tie(rhs.priority, rhs.object);
-    }
-  };
 public:
-  using Id = typename set<PriorityObject>::iterator;
+  using Id = pair<int, typename list<T>::iterator>;
 
   // Добавить объект с нулевым приоритетом
   // с помощью перемещения и вернуть его идентификатор
   Id Add(T object) {
-    auto [iterator, _] = queue.insert(PriorityObject{std::move(object), 0});
-    return iterator;
+    objects[0].push_back(move(object));
+    return {0, --objects[0].end()};
   }
 
   // Добавить все элементы диапазона [range_begin, range_end)
@@ -38,41 +32,49 @@ public:
   void Add(ObjInputIt range_begin, ObjInputIt range_end,
            IdOutputIt ids_begin) {
     while(range_begin != range_end) {
-      *(ids_begin++) = *(range_begin++);
+      *(ids_begin++) = Add(move(*(range_begin++)));
     }
   }
 
   // Определить, принадлежит ли идентификатор какому-либо
   // хранящемуся в контейнере объекту
   bool IsValid(Id id) const {
-    return id >= queue.begin() && id < queue.end();
+    if(objects.count(id.first)) {
+        const list<T>& cluster = objects[id.first];
+        return id.second >= cluster.begin() && id.second <= cluster.end();
+    }
+    return false;
   }
 
   // Получить объект по идентификатору
   const T& Get(Id id) const {
-    return id->object;
+    return *(id.second);
   }
 
   // Увеличить приоритет объекта на 1
   void Promote(Id id) {
-    id->priority = 1;
+    objects[id.first + 1].push_back(move(*(id.second)));
+    objects[id.first].erase(id.second);
   }
 
   // Получить объект с максимальным приоритетом и его приоритет
   pair<const T&, int> GetMax() const {
-    const PriorityObject& min_priority = queue.front();
-    return {min_priority.object, min_priority.priority};
+    return {objects.begin()->second.front(), objects.begin()->first};
   }
 
   pair<T, int> PopMax() {
-    PriorityObject min_priority = move(queue.extract(queue.begin()).value());
-    queue.erase(queue.begin());
-    return {move(min_priority.object), move(min_priority.priority)};
+    T value = std::move(objects.begin()->second.front());
+    int priority = objects.begin()->first;
+
+    objects.begin()->second.erase(objects.begin()->second.begin());
+    return {move(value), priority};
   }
 private:
-  set<PriorityObject> queue;
+  map<int, list<T>, std::greater<int>> objects;
 };
 
+// Set of pointers to clusters of objects with same priorities: set<Wrapper<int, vector<list<T>>::iterator>> priorities
+// vector<list<T>> objects;
 
 class StringNonCopyable : public string {
 public:
