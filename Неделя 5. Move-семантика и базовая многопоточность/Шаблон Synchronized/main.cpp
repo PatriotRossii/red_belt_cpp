@@ -18,7 +18,9 @@ template <typename T>
 class Synchronized {
 public:
   explicit Synchronized(T initial = T())
-    : value(move(initial)) { }
+    : value(move(initial))
+  {
+  }
 
   struct Access {
     T& ref_to_value;
@@ -29,12 +31,9 @@ public:
     return {value, lock_guard(m)};
   }
 
-  Access GetAccess() {
-    return Access(mtx, value);
-  }
 private:
   T value;
-  mutex mtx;
+  mutex m;
 };
 
 void TestConcurrentUpdate() {
