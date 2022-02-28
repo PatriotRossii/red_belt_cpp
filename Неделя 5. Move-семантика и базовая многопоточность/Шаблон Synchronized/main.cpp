@@ -8,6 +8,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <utility>
 
 using namespace std;
 
@@ -16,18 +17,17 @@ using namespace std;
 template <typename T>
 class Synchronized {
 public:
-  explicit Synchronized(T initial = T()) {
-
-  }
+  explicit Synchronized(T initial = T())
+    : value(move(initial)) { }
 
   struct Access {
-  private:
-    scoped_lock<mutex> lock;
-  public:
     T& ref_to_value;
-    Access(mutex& mtx, T& ref)
-      : lock(mtx), ref_to_value(ref) { }
+    lock_guard<mutex> guard;
   };
+
+  Access GetAccess() {
+    return {value, lock_guard(m)};
+  }
 
   Access GetAccess() {
     return Access(mtx, value);
