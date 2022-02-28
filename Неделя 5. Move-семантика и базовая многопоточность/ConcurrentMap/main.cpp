@@ -1,7 +1,7 @@
-//#include "test_runner.h"
-#include "../../common/test_runner.h"
-//#include "profile.h"
-#include "../../common/profile.h"
+#include "test_runner.h"
+//#include "../../common/test_runner.h"
+#include "profile.h"
+//#include "../../common/profile.h"
 
 #include <algorithm>
 #include <future>
@@ -11,50 +11,42 @@
 #include <random>
 #include <unordered_map>
 #include <deque>
+#include <mutex>
+#include <atomic>
 
 using namespace std;
 
 template <typename K, typename V>
 class ConcurrentMap {
-  vector<unordered_map<K, V>> buckets;
-  deque<mutex> mutexes;
-  int bucket_idx{0};
-  mutex total_lock;
+  vector<pair<mutex, map<K, V>>> buckets;
 public:
   static_assert(is_integral_v<K>, "ConcurrentMap supports only integer keys");
 
-  struct Access {
-    V& ref_to_value;
-    lock_guard<mutex> lock;
-  };
+    struct Access
+    {
+        Access(const K& key, std::pair<std::mutex, std::map<K, V>>& bucket_content) :
+                guard(bucket_content.first), ref_to_value(bucket_content.second[key])
+        {
+        }
+        std::lock_guard<std::mutex> guard;
+        V& ref_to_value;
+    };
 
-  explicit ConcurrentMap(size_t bucket_count) {
-    buckets.resize(bucket_count);
-    mutexes.resize(bucket_count);
-  }
+  explicit ConcurrentMap(size_t bucket_count): buckets(bucket_count) { }
 
   Access operator[](const K& key) {
-    for(auto idx = 0; idx != buckets.size(); ++idx) {
-        if(buckets[idx].count(key) != 0) return Access{buckets[idx][key], lock_guard(mutexes[idx])};
-    }
-    buckets[bucket_idx][key] = V();
-
-    int previous_idx = bucket_idx;
-    bucket_idx = (bucket_idx + 1) % buckets.size();
-
-    return Access{buckets[previous_idx][key], lock_guard(mutexes[previous_idx])};
+    auto& bucket = buckets[(key < 0 ? -key : key) % buckets.size()];
+    return {key, bucket};
   }
 
   map<K, V> BuildOrdinaryMap() {
-    total_lock.lock();
-    map<K, V> result;
-    for(auto idx = 0; idx != buckets.size(); ++idx) {
-      for(auto& [key, value]: buckets[idx]) {
-        result[key] = value;
-      }
+    map<K, V> temp;
+    for (auto& [mtx, mapping] : buckets)
+    {
+        std::lock_guard<std::mutex> lck_guard{mtx};
+        temp.insert(begin(mapping), end(mapping));
     }
-    return result;
-    total_lock.unlock();
+    return temp;
   }
 };
 
